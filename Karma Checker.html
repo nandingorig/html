@@ -71,7 +71,7 @@ async function checkKarma() {
     try {
         const response = await fetch(url);
         if (response.status === 404) {
-            resultDiv.innerHTML = "❌ User not found or deleted.";
+            resultDiv.innerHTML = "❌ Suspended or deleted.";
             return;
         }
         if (!response.ok) {
@@ -102,3 +102,4 @@ async function checkKarma() {
 </script>
 </body>
 </html>
+
