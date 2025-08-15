@@ -1,0 +1,104 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Reddit Karma Checker</title>
+<style>
+    body {
+        font-family: Arial, sans-serif;
+        background-color: #0f172a;
+        color: #f1f5f9;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        min-height: 100vh;
+    }
+    .card {
+        background: #1e293b;
+        padding: 20px;
+        border-radius: 12px;
+        box-shadow: 0 4px 20px rgba(0,0,0,0.4);
+        width: 350px;
+        text-align: center;
+    }
+    input {
+        padding: 10px;
+        border: none;
+        border-radius: 8px;
+        width: 80%;
+        margin-bottom: 10px;
+    }
+    button {
+        padding: 10px;
+        border: none;
+        border-radius: 8px;
+        background: #3b82f6;
+        color: white;
+        cursor: pointer;
+        font-weight: bold;
+    }
+    button:hover {
+        background: #2563eb;
+    }
+    .result {
+        margin-top: 15px;
+        font-size: 1.1em;
+    }
+</style>
+</head>
+<body>
+<div class="card">
+    <h2>Reddit Karma Checker</h2>
+    <input type="text" id="username" placeholder="Enter Reddit username">
+    <br>
+    <button onclick="checkKarma()">Check Karma</button>
+    <div class="result" id="result"></div>
+</div>
+
+<script>
+async function checkKarma() {
+    const username = document.getElementById("username").value.trim();
+    const resultDiv = document.getElementById("result");
+
+    if (!username) {
+        resultDiv.innerHTML = "⚠️ Please enter a username.";
+        return;
+    }
+
+    const url = `https://www.reddit.com/user/${encodeURIComponent(username)}/about.json`;
+
+    resultDiv.innerHTML = "⏳ Checking...";
+    try {
+        const response = await fetch(url);
+        if (response.status === 404) {
+            resultDiv.innerHTML = "❌ User not found or deleted.";
+            return;
+        }
+        if (!response.ok) {
+            resultDiv.innerHTML = `⚠️ Error: HTTP ${response.status}`;
+            return;
+        }
+        const json = await response.json();
+        const data = json.data;
+        if (!data) {
+            resultDiv.innerHTML = "⚠️ No data returned.";
+            return;
+        }
+
+        const linkKarma = data.link_karma || 0;
+        const commentKarma = data.comment_karma || 0;
+        const totalKarma = linkKarma + commentKarma;
+
+        resultDiv.innerHTML = `
+            ✅ <b>${data.name}</b><br>
+            Link Karma: ${linkKarma.toLocaleString()}<br>
+            Comment Karma: ${commentKarma.toLocaleString()}<br>
+            <b>Total Karma:</b> ${totalKarma.toLocaleString()}
+        `;
+    } catch (err) {
+        resultDiv.innerHTML = `❌ Error: ${err.message}`;
+    }
+}
+</script>
+</body>
+</html>
