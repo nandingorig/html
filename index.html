@@ -1,0 +1,46 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <title>Reddit Karma Checker</title>
+</head>
+<body>
+  <h1>Reddit Karma Checker</h1>
+  <form id="form">
+    <input id="username" placeholder="Enter Reddit username" required>
+    <button>Check</button>
+  </form>
+  <div id="output"></div>
+
+  <script>
+    const $ = (id) => document.getElementById(id);
+
+    async function fetchUser(name){
+      const url = `https://www.reddit.com/user/${encodeURIComponent(name)}/about.json`;
+      // Use a free CORS proxy so it works on GitHub Pages
+      const proxiedUrl = "https://api.allorigins.win/raw?url=" + encodeURIComponent(url);
+      const res = await fetch(proxiedUrl);
+      if (!res.ok) throw new Error("Failed to fetch");
+      return res.json();
+    }
+
+    $('form').addEventListener('submit', async (e)=>{
+      e.preventDefault();
+      const name = $('username').value.trim();
+      $('output').textContent = "Loading...";
+      try {
+        const data = await fetchUser(name);
+        const d = data.data;
+        $('output').innerHTML = `
+          <p><b>u/${d.name}</b></p>
+          <p>Total karma: ${d.total_karma}</p>
+          <p>Post karma: ${d.link_karma}</p>
+          <p>Comment karma: ${d.comment_karma}</p>
+        `;
+      } catch(err){
+        $('output').textContent = "Error: " + err.message;
+      }
+    });
+  </script>
+</body>
+</html>
